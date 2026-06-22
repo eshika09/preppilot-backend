@@ -1,5 +1,6 @@
 package com.example.preppilot.demo.dto.request;
 
+import com.example.preppilot.demo.entity.CompanyPriority;
 import com.example.preppilot.demo.entity.CompanyStatus;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
@@ -19,4 +20,6 @@ public class CompanyRequest {
     private String notes;
 
     private LocalDate deadline;
+
+    private CompanyPriority priority;
 }

@@ -5,6 +5,7 @@ import com.example.preppilot.demo.Repository.UserRepository;
 import com.example.preppilot.demo.dto.request.CompanyRequest;
 import com.example.preppilot.demo.dto.response.CompanyResponse;
 import com.example.preppilot.demo.entity.Company;
+import com.example.preppilot.demo.entity.CompanyPriority;
 import com.example.preppilot.demo.entity.CompanyStatus;
 import com.example.preppilot.demo.entity.User;
 import lombok.RequiredArgsConstructor;
@@ -39,6 +40,7 @@ public class CompanyService {
                 .notes(company.getNotes())
                 .deadline(company.getDeadline())
                 .createdAt(company.getCreatedAt())
+                .priority(company.getPriority())
                 .build();
     }
 
@@ -50,6 +52,7 @@ public class CompanyService {
                 .name(request.getName())
                 .role(request.getRole())
                 .status(request.getStatus() != null ? request.getStatus() : CompanyStatus.APPLIED)
+                .priority(request.getPriority() != null ? request.getPriority() : CompanyPriority.MEDIUM)
                 .notes(request.getNotes())
                 .deadline(request.getDeadline())
                 .user(user)
@@ -84,6 +87,9 @@ public class CompanyService {
         if (request.getStatus() != null) {
             company.setStatus(request.getStatus());
         }
+        if (request.getPriority() != null) {
+            company.setPriority(request.getPriority());
+        }
         company.setNotes(request.getNotes());
         company.setDeadline(request.getDeadline());
 
@@ -96,5 +102,36 @@ public class CompanyService {
         Company company = companyRepository.findByIdAndUser(id, user)
                 .orElseThrow(() -> new RuntimeException("Company not found or access denied"));
         companyRepository.delete(company);
+    }
+
+    // Search companies by name
+    public List<CompanyResponse> searchCompanies(String name) {
+        User user = getLoggedInUser();
+        return companyRepository
+                .findByUserAndNameContainingIgnoreCaseOrderByCreatedAtDesc(user, name)
+                .stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    // Filter companies by status and/or priority
+    public List<CompanyResponse> filterCompanies(CompanyStatus status, CompanyPriority priority) {
+        User user = getLoggedInUser();
+        List<Company> results;
+
+        if (status != null && priority != null) {
+            results = companyRepository
+                    .findByUserAndStatusAndPriorityOrderByCreatedAtDesc(user, status, priority);
+        } else if (status != null) {
+            results = companyRepository
+                    .findByUserAndStatusOrderByCreatedAtDesc(user, status);
+        } else if (priority != null) {
+            results = companyRepository
+                    .findByUserAndPriorityOrderByCreatedAtDesc(user, priority);
+        } else {
+            results = companyRepository.findByUserOrderByCreatedAtDesc(user);
+        }
+
+        return results.stream().map(this::toResponse).collect(Collectors.toList());
     }
 }

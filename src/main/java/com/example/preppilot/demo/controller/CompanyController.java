@@ -2,6 +2,8 @@ package com.example.preppilot.demo.controller;
 
 import com.example.preppilot.demo.dto.request.CompanyRequest;
 import com.example.preppilot.demo.dto.response.CompanyResponse;
+import com.example.preppilot.demo.entity.CompanyPriority;
+import com.example.preppilot.demo.entity.CompanyStatus;
 import com.example.preppilot.demo.service.CompanyService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -41,5 +43,20 @@ public class CompanyController {
     public ResponseEntity<String> deleteCompany(@PathVariable Long id) {
         companyService.deleteCompany(id);
         return ResponseEntity.ok("Company deleted successfully");
+    }
+
+    // Search by name
+    @GetMapping("/search")
+    public ResponseEntity<List<CompanyResponse>> searchCompanies(
+            @RequestParam String name) {
+        return ResponseEntity.ok(companyService.searchCompanies(name));
+    }
+
+    // Filter by status and/or priority
+    @GetMapping("/filter")
+    public ResponseEntity<List<CompanyResponse>> filterCompanies(
+            @RequestParam(required = false) CompanyStatus status,
+            @RequestParam(required = false) CompanyPriority priority) {
+        return ResponseEntity.ok(companyService.filterCompanies(status, priority));
     }
 }

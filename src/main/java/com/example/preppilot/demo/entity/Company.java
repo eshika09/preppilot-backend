@@ -50,4 +50,8 @@ public class Company {
         }
     }
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private CompanyPriority priority = CompanyPriority.MEDIUM;
+
 }
