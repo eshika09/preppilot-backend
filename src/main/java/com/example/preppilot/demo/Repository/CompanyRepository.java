@@ -46,4 +46,9 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
     List<Company> findByUserAndDeadlineBetweenOrderByDeadlineAsc(
             User user, LocalDate from, LocalDate to);
 
+
+    // Find all companies with deadline = specific date across ALL users
+// used by scheduler to find tomorrow's deadlines
+    @Query("SELECT c FROM Company c WHERE c.deadline = :deadline")
+    List<Company> findAllByDeadline(@Param("deadline") LocalDate deadline);
 }
