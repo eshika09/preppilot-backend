@@ -44,6 +44,7 @@ public class AuthService {
                 .password(passwordEncoder.encode(request.getPassword()))
                 .isPremium(false)
                 .analysisCount(0)
+                .role("USER")
                 .build();
 
         userRepository.save(user);

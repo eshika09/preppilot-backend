@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/companies")
@@ -24,8 +25,10 @@ public class CompanyController {
     }
 
     @GetMapping
-    public ResponseEntity<List<CompanyResponse>> getAllCompanies() {
-        return ResponseEntity.ok(companyService.getAllCompanies());
+    public ResponseEntity<Map<String, Object>> getAllCompanies(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return ResponseEntity.ok(companyService.getAllCompanies(page, size));
     }
 
     @GetMapping("/{id}")

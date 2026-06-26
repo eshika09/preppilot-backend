@@ -9,12 +9,19 @@ import com.example.preppilot.demo.entity.CompanyPriority;
 import com.example.preppilot.demo.entity.CompanyStatus;
 import com.example.preppilot.demo.entity.User;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
+
+import org.springframework.data.domain.Pageable;
+
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -61,12 +68,21 @@ public class CompanyService {
         return toResponse(companyRepository.save(company));
     }
 
-    public List<CompanyResponse> getAllCompanies() {
+    public Map<String, Object> getAllCompanies(int page, int size) {
         User user = getLoggedInUser();
-        return companyRepository.findByUserOrderByCreatedAtDesc(user)
-                .stream()
-                .map(this::toResponse)
-                .collect(Collectors.toList());
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Company> companyPage = companyRepository
+                .findByUserOrderByCreatedAtDesc(user, pageable);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("companies", companyPage.getContent()
+                .stream().map(this::toResponse).collect(Collectors.toList()));
+        response.put("currentPage", companyPage.getNumber());
+        response.put("totalItems", companyPage.getTotalElements());
+        response.put("totalPages", companyPage.getTotalPages());
+        response.put("isLast", companyPage.isLast());
+
+        return response;
     }
 
     public CompanyResponse getCompany(Long id) {
